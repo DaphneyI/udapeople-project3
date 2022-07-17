@@ -10,6 +10,11 @@ orbs:
   slack: circleci/slack@4.10.1
 commands:
   configure-aws:
+    parameters:
+      event:
+      type: enum
+      enum: [always, on_fail]
+      default: always
     steps:
       - run:
           name: configure aws
@@ -17,6 +22,7 @@ commands:
             aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
             aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
             aws configure set default.region $AWS_DEFAULT_REGION
+          when: << parameters.event >>
     
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
@@ -228,7 +234,9 @@ jobs:
           command: |
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml
-      Here's where you will add some code to rollback on failure  
+      - configure-aws:
+          event: on_fail
+      - destroy-environment
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: fail
