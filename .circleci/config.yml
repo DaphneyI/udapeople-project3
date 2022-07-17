@@ -220,7 +220,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk update && apk add --no-cache curl gcompat gzip tar ansible zip binutils
+            apk update && apk add --no-cache curl glibc glibc-bin gzip tar ansible zip binutils
             curl -s https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.7.6.zip \
             -o awscliv2.zip
             ls
