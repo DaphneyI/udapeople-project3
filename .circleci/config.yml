@@ -266,7 +266,7 @@ jobs:
       - run:
           name: Send migration results to kvdb
           command: |
-            if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
+            if grep -q "has been executed successfully." backend/migrations_dump.txt
             then
               curl https://kvdb.io/P8Xcc73g9yAfoYt7Cqb7Qs/migration_${CIRCLE_WORKFLOW_ID:0:5}  -d '1'
             fi
@@ -277,6 +277,9 @@ jobs:
           channel: $SLACK_DEFAULT_CHANNEL
           event: fail
           template: basic_fail_1
+      - store_artifacts:
+          path: backend
+          destination: migrations_dump.txt
 
 workflows:
   my_workflow:
