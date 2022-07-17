@@ -154,38 +154,34 @@ jobs:
             aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
             aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
             aws configure set default.region $AWS_DEFAULT_REGION
-            cat ~/.aws/credentials
-            cat ~/.aws/config
-            aws ec2 describe-instances
-            
-      # - run:
-      #     name: Ensure back-end infrastructure exists
-      #     command: |
-      #       aws cloudformation deploy \
-      #         --template-file .circleci/files/backend.yml \
-      #         --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:5}" \
-      #         --tags project=udaproject3 \
-      #         --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:5}"  
-      # - run:
-      #     name: Ensure front-end infrastructure exist
-      #     command: |
-      #       aws cloudformation deploy \
-      #         --template-file .circleci/files/frontend.yml \
-      #         --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:5}" \
-      #         --tags project=udacityproject3 \
-      #         --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:5}"  
-      # - run:
-      #     name: Add back-end ip to ansible inventory
-      #     command: |
-      #       cd .circleci/ansible
-      #       echo [all] > inventory
-      #       aws ec2 describe-instances \
-      #       --query 'Reservations[*].Instances[*].PublicIpAddress' \
-      #       --output text >> inventory
-      # - persist_to_workspace:
-      #     root: ~/
-      #     paths:
-      #       - project/.circleci/ansible/inventory.txt
+      - run:
+          name: Ensure back-end infrastructure exists
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/backend.yml \
+              --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:5}" \
+              --tags project=udaproject3 \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:5}"  
+      - run:
+          name: Ensure front-end infrastructure exist
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/frontend.yml \
+              --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:5}" \
+              --tags project=udacityproject3 \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:5}"  
+      - run:
+          name: Add back-end ip to ansible inventory
+          command: |
+            cd .circleci/ansible
+            echo [all] > inventory
+            aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --output text >> inventory
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/.circleci/ansible/inventory.txt
       - destroy-environment  
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
