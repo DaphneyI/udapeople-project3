@@ -10,6 +10,7 @@ orbs:
 default-context: &default-context
   context:
     - udacity-project-3
+
 jobs:
   build-frontend:
     executor: node
@@ -124,18 +125,18 @@ workflows:
   my_workflow:
     jobs:
       - build-frontend:
-          *default-context
+          <<: *default-context
       - build-backend:
-          *default-context
+          <<: *default-context
       - test-frontend:
-          *default-context
+          <<: *default-context
           requires: [build-frontend]
       - test-backend:
-          *default-context
+          <<: *default-context
           requires: [build-backend]
       - scan-frontend:
-          *default-context
+          <<: *default-context
           requires: [build-frontend]
       - scan-backend:
-          *default-context
+          <<: *default-context
           requires: [build-backend]
