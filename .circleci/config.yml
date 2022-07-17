@@ -247,10 +247,13 @@ jobs:
           template: basic_fail_1 
        
   test_workspace:
+    docker:
+      - image: alpine:latest
     steps:
       - checkout
       - run: 
           command: |
+            apk add tar gzip
             cd .circleci/ansible
             echo "howdy" > test.txt
       - persist_to_workspace:
@@ -259,8 +262,11 @@ jobs:
             - test.txt
   
   check_workspace:
+    docker:
+      - image: alpine:latest
     steps:
       - checkout
+      - run: apk add tar gzip
       - attach_workspace:
           at: project/.circleci/ansible
       - run:
