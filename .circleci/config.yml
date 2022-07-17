@@ -9,6 +9,15 @@ executors:
 orbs: 
   slack: circleci/slack@4.10.1
 commands:
+  configure-aws:
+    steps:
+      - run:
+          name: configure aws
+          command: |
+            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+            aws configure set default.region $AWS_DEFAULT_REGION
+    
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
@@ -161,12 +170,7 @@ jobs:
       - run:
           name: install dependencies
           command: yum install tar gzip curl -y
-      - run:
-          name: configure aws
-          command: |
-            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-            aws configure set default.region $AWS_DEFAULT_REGION
+      - configure-aws
       - run:
           name: Ensure back-end infrastructure exists
           command: |
@@ -216,36 +220,46 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add tar gzip
-             apk add --update ansible 
-      - attach_workspace:
-          at: project/.circleci/ansible
-      - run:
-          name: Configure server
-          command: |
-            # Your code here
-            exit 1
-      # Here's where you will add some code to rollback on failure   
+            apk update && apk add --no-cache curl gcompat gzip tar ansible
+            curl -s https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWS_CLI_VER}.zip \
+            -o awscliv2.zip
+            unzip awscliv2.zip
+            ./aws/install
+      # - attach_workspace:
+      #     at: project/.circleci/ansible
+      # - run:
+      #     name: Configure server
+      #     command: |
+      #       cd .circleci/ansible
+      #       ansible-playbook -i inventory.txt configure-server.yml
+      # Here's where you will add some code to rollback on failure  
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1 
        
 workflows:
   my_workflow:
     jobs:
-      - build-frontend:
+      # - build-frontend:
+      #     <<: *default-context
+      # - build-backend:
+      #     <<: *default-context
+      # - test-frontend:
+      #     <<: *default-context
+      #     requires: [build-frontend]
+      # - test-backend:
+      #     <<: *default-context
+      #     requires: [build-backend]
+      # - scan-frontend:
+      #     <<: *default-context
+      #     requires: [build-frontend]
+      # - scan-backend:
+      #     <<: *default-context
+      #     requires: [build-backend]
+      # - deploy-infrastructure:
+      #    <<: *default-context
+      #    requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      - configure-infrastructure:
           <<: *default-context
-      - build-backend:
-          <<: *default-context
-      - test-frontend:
-          <<: *default-context
-          requires: [build-frontend]
-      - test-backend:
-          <<: *default-context
-          requires: [build-backend]
-      - scan-frontend:
-          <<: *default-context
-          requires: [build-frontend]
-      - scan-backend:
-          <<: *default-context
-          requires: [build-backend]
-      - deploy-infrastructure:
-         <<: *default-context
-         requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          # requires: [deploy-infrastructure] 
