@@ -248,6 +248,8 @@ jobs:
     executor: node
     steps:
       - checkout
+      - restore_cache:
+          keys: [backend-build]
       - run: 
           name: install dependencies
           command: |
@@ -269,9 +271,9 @@ jobs:
             then
               curl https://kvdb.io/P8Xcc73g9yAfoYt7Cqb7Qs/migration_${CIRCLE_WORKFLOW_ID:0:5}  -d '1'
             fi
-      # - configure-aws:
-      #     event: "on_fail"
-      # - destroy-environment
+      - configure-aws:
+          event: "on_fail"
+      - destroy-environment
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: fail
@@ -280,29 +282,29 @@ jobs:
 workflows:
   my_workflow:
     jobs:
-      # - build-frontend:
-      #     <<: *default-context
-      # - build-backend:
-      #     <<: *default-context
-      # - test-frontend:
-      #     <<: *default-context
-      #     requires: [build-frontend]
-      # - test-backend:
-      #     <<: *default-context
-      #     requires: [build-backend]
-      # - scan-frontend:
-      #     <<: *default-context
-      #     requires: [build-frontend]
-      # - scan-backend:
-      #     <<: *default-context
-      #     requires: [build-backend]
-      # - deploy-infrastructure:
-      #    <<: *default-context
-      #    requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      # - configure-infrastructure:
-      #     <<: *default-context
-      #     requires: [deploy-infrastructure] 
+      - build-frontend:
+          <<: *default-context
+      - build-backend:
+          <<: *default-context
+      - test-frontend:
+          <<: *default-context
+          requires: [build-frontend]
+      - test-backend:
+          <<: *default-context
+          requires: [build-backend]
+      - scan-frontend:
+          <<: *default-context
+          requires: [build-frontend]
+      - scan-backend:
+          <<: *default-context
+          requires: [build-backend]
+      - deploy-infrastructure:
+         <<: *default-context
+         requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      - configure-infrastructure:
+          <<: *default-context
+          requires: [deploy-infrastructure] 
       - run-migrations:
           <<: *default-context
-          # requires: [configure-infrastructure]
+          requires: [configure-infrastructure]
      
