@@ -157,6 +157,7 @@ jobs:
             cat ~/.aws/credentials
             cat ~/.aws/config
             aws ec2 describe-instances
+            
       # - run:
       #     name: Ensure back-end infrastructure exists
       #     command: |
