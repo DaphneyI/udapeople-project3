@@ -12,7 +12,7 @@
     update_cache: yes
     pkg: 
       - nodejs
-      - python3.8
+      - python3
 
 - name: install npm with apt
   apt:
