@@ -210,8 +210,7 @@ jobs:
           template: basic_fail_1
 
   configure-infrastructure:
-    docker:
-      - image: python:3.10.5-alpine3.16
+    executor: aws
     steps:
       - checkout
       - add_ssh_keys:
@@ -220,29 +219,9 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk update && apk add --no-cache curl gzip tar ansible zip binutils
-
-            # get glibc version
-            GLIBC_VER=$(curl -s https://api.github.com/repos/sgerrand/alpine-pkg-glibc/releases/latest \
-            | grep tag_name | cut -d : -f 2,3 | tr -d \",' ') 
+            dnf install python3 -y
+            yum --update install tar gzip ansible -y
            
-            curl -sL \
-            https://raw.githubusercontent.com/sgerrand/alpine-pkg-glibc/master/sgerrand.rsa.pub \
-            -o /etc/apk/keys/sgerrand.rsa.pub \
-      
-            curl -sLO \
-            https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VER}/glibc-${GLIBC_VER}.apk \
-
-            curl -sLO \
-            https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VER}/glibc-bin-${GLIBC_VER}.apk \
-
-            apk add --no-cache glibc-${GLIBC_VER}.apk glibc-bin-${GLIBC_VER}.apk
-
-            curl -s https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.7.6.zip -o awscliv2.zip
-            ls
-            unzip awscliv2.zip
-            ./aws/install
-            aws --version
       # - attach_workspace:
       #     at: project/.circleci/ansible
       # - run:
