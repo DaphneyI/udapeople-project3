@@ -210,7 +210,8 @@ jobs:
           template: basic_fail_1
 
   configure-infrastructure:
-    executor: aws
+    docker:
+      - image: python:3.10-slim-buster
     steps:
       - checkout
       - add_ssh_keys:
@@ -219,8 +220,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            dnf install python3 -y
-            yum --update install tar gzip ansible -y
+            sudo apt install tar gzip ansible -y
            
       # - attach_workspace:
       #     at: project/.circleci/ansible
