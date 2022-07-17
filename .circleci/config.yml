@@ -254,7 +254,7 @@ jobs:
             cd .circleci/ansible
             echo "howdy" > test.txt
       - persist_to_workspace:
-          root: project/.circleci/ansible
+          root: .circleci/ansible
           paths:
             - test.txt
   
@@ -262,7 +262,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: project/.circleci/ansible
+          at: .circleci/ansible
       - run:
           command: |
             cd .circleci/ansible
