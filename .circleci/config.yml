@@ -205,12 +205,10 @@ jobs:
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --output text >> inventory
-            ls
-            cat inventory
       - persist_to_workspace:
-          root: ~/
+          root: .circleci/ansible
           paths:
-            - project/.circleci/ansible/inventory
+            - inventory
       - destroy-environment  
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
@@ -230,14 +228,14 @@ jobs:
           command: |
             apk update && apk add --no-cache curl jq gzip tar ansible aws-cli
       - attach_workspace:
-          at: project/.circleci/ansible
+          at: .circleci/ansible
       - run:
           name: Configure server
           command: |
             cd .circleci/ansible
             ls
             cat inventory
-            # ansible-playbook -i inventory configure-server.yml
+            ansible-playbook -i inventory configure-server.yml
       - configure-aws:
           event: "on_fail"
       - destroy-environment
@@ -279,28 +277,28 @@ jobs:
 workflows:
   my_workflow:
     jobs:
-      # - build-frontend:
-      #     <<: *default-context
-      # - build-backend:
-      #     <<: *default-context
-      # - test-frontend:
-      #     <<: *default-context
-      #     requires: [build-frontend]
-      # - test-backend:
-      #     <<: *default-context
-      #     requires: [build-backend]
-      # - scan-frontend:
-      #     <<: *default-context
-      #     requires: [build-frontend]
-      # - scan-backend:
-      #     <<: *default-context
-      #     requires: [build-backend]
-      # - deploy-infrastructure:
-      #    <<: *default-context
-      #    requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      # - configure-infrastructure:
-      #     <<: *default-context
-      #     requires: [deploy-infrastructure] 
-      - test_workspace
-      - check_workspace:
-          requires: [test_workspace]
+      - build-frontend:
+          <<: *default-context
+      - build-backend:
+          <<: *default-context
+      - test-frontend:
+          <<: *default-context
+          requires: [build-frontend]
+      - test-backend:
+          <<: *default-context
+          requires: [build-backend]
+      - scan-frontend:
+          <<: *default-context
+          requires: [build-frontend]
+      - scan-backend:
+          <<: *default-context
+          requires: [build-backend]
+      - deploy-infrastructure:
+         <<: *default-context
+         requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      - configure-infrastructure:
+          <<: *default-context
+          requires: [deploy-infrastructure] 
+      # - test_workspace
+      # - check_workspace:
+      #     requires: [test_workspace]
