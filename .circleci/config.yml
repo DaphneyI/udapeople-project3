@@ -224,9 +224,9 @@ jobs:
             curl -s https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.7.6.zip \
             -o awscliv2.zip
             ls
-            # unzip awscliv2.zip
-            # ./aws/install
-            # aws --version
+            unzip awscliv2.zip
+            ./aws/install
+            aws --version
       # - attach_workspace:
       #     at: project/.circleci/ansible
       # - run:
