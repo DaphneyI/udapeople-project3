@@ -245,10 +245,13 @@ jobs:
           template: basic_fail_1 
        
   run-migrations:
-    docker:
-      # Docker image here that supports NodeJS
+    executor: node
     steps:
-      # Checkout code from git
+      - checkout
+      - run: 
+          name: install dependencies
+          command: |
+            apt install aws-cli
       - run:
           name: Run migrations
           command: |
@@ -262,7 +265,13 @@ jobs:
             then
               curl https://kvdb.io/P8Xcc73g9yAfoYt7Cqb7Qs/migration_${CIRCLE_WORKFLOW_ID:0:5}  -d '1'
             fi
-     # Here's where you will add some code to rollback on failure 
+      - configure-aws:
+          event: "on_fail"
+      - destroy-environment
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
 
 workflows:
   my_workflow:
@@ -289,6 +298,9 @@ workflows:
       - configure-infrastructure:
           <<: *default-context
           requires: [deploy-infrastructure] 
+      - run-migrations:
+          <<: *default-context
+          requires: [configure-infrastructure]
       # - test_workspace
       # - check_workspace:
       #     requires: [test_workspace]
