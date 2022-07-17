@@ -174,9 +174,12 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      - destroy-environment     
-
-
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1
+      - destroy-environment    
+       
 workflows:
   my_workflow:
     jobs:
@@ -196,3 +199,6 @@ workflows:
       - scan-backend:
           <<: *default-context
           requires: [build-backend]
+      - deploy-infrastructure:
+         <<: *default-context
+         requires: [test-frontend, test-backend, scan-frontend, scan-backend]
