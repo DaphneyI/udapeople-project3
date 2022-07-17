@@ -65,9 +65,9 @@ jobs:
               npm install
               npm run test 
         - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          event: fail
-          template: basic_fail_1
+            channel: $SLACK_DEFAULT_CHANNEL
+            event: fail
+            template: basic_fail_1
                 
   test-backend:
     executor: node
