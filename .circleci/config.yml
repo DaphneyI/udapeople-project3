@@ -34,14 +34,6 @@ commands:
             aws cloudformation describe-stack-events \
             --stack-name ${STACK_NAME}
           name: cloudformation stack debug 
-          when: on_fail:
-    description: prints the cloudforation events for debuggig failed cloudformation commands
-    steps:
-      - run:  
-          command: |
-            aws cloudformation describe-stack-events \
-            --stack-name ${STACK_NAME}
-          name: cloudformation stack debug 
           when: on_fail
 
 # use yaml syntax to reduce redundancy when defining context 
