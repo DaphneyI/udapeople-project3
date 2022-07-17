@@ -205,6 +205,8 @@ jobs:
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --output text >> inventory
+            ls
+            cat inventory
       - persist_to_workspace:
           root: ~/
           paths:
@@ -266,6 +268,6 @@ workflows:
       - deploy-infrastructure:
          <<: *default-context
          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      - configure-infrastructure:
-          <<: *default-context
-          requires: [deploy-infrastructure] 
+      # - configure-infrastructure:
+      #     <<: *default-context
+      #     requires: [deploy-infrastructure] 
