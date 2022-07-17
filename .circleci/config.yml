@@ -3,8 +3,26 @@ executors:
   node:
     docker:
       - image: circleci/node:13.8.0
+  aws:
+    docker:
+      - image: amazon/aws-cli
 orbs: 
   slack: circleci/slack@4.10.1
+commands:
+  destroy-environment:
+    description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
+    parameters:
+      frontend-stack-name:
+        default: frontend-${CIRCLE_WORKFLOW_ID:0:5} 
+      backend-stack-name:
+        default: backend-${CIRCLE_WORKFLOW_ID:0:5} 
+    steps:
+      - run:
+          name: Destroy environments
+          when: on_fail
+          command: |
+            aws cloudformation delete-stack --stack-name << parameters.frontend-stack-name >>
+            aws cloudformation delete-stack --stack-name << parameters.backend-stack-name >>
 
 # use yaml syntax to reduce redundancy when defining context 
 default-context: &default-context
@@ -120,6 +138,44 @@ jobs:
           channel: $SLACK_DEFAULT_CHANNEL
           event: fail
           template: basic_fail_1
+
+  deploy-infrastructure:
+    executor: aws
+    steps:
+      - checkout
+      - run:
+          name: install dependencies
+          command: yum install tar gzip curl -y
+      - run:
+          name: Ensure back-end infrastructure exists
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/backend.yml \
+              --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:5}" \
+              --tags project=udaproject3 \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:5}"  
+      - run:
+          name: Ensure front-end infrastructure exist
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/frontend.yml \
+              --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:5}" \
+              --tags project=udacityproject3 \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:5}"  
+      - run:
+          name: Add back-end ip to ansible inventory
+          command: |
+            cd .circleci/ansible
+            echo [all] > inventory
+            aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --output text >> inventory
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/.circleci/ansible/inventory.txt
+      - destroy-environment     
+
 
 workflows:
   my_workflow:
