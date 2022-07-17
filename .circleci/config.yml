@@ -208,7 +208,7 @@ jobs:
       - persist_to_workspace:
           root: ~/
           paths:
-            - project/.circleci/ansible/inventory.txt
+            - project/.circleci/ansible/inventory
       - destroy-environment  
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
@@ -226,14 +226,16 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk update && apk add --no-cache curl gzip tar ansible aws-cli
+            apk update && apk add --no-cache curl jq gzip tar ansible aws-cli
       - attach_workspace:
-          at: project/.circleci/ansible
+          at: .circleci/ansible
       - run:
           name: Configure server
           command: |
             cd .circleci/ansible
-            ansible-playbook -i inventory.txt configure-server.yml
+            ls
+            cat .circleci/ansible/inventory
+            # ansible-playbook -i inventory configure-server.yml
       - configure-aws:
           event: "on_fail"
       - destroy-environment
