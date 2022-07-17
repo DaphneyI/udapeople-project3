@@ -251,7 +251,7 @@ jobs:
       - run: 
           name: install dependencies
           command: |
-            apt install aws-cli
+            sudo apt install aws-cli curl -y
       - run:
           name: Run migrations
           command: |
