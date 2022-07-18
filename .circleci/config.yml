@@ -285,7 +285,6 @@ jobs:
           name: Install dependencies
           command: |
             yum update
-            yum install epel-release
             yum install curl
             yum install python3 
             yum install nodejs:18 
