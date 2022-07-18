@@ -356,7 +356,7 @@ jobs:
             yum install nodejs -y
             node --version
             npm --version
-      - - attach_workspace:
+      - attach_workspace:
           at: .circleci/ansible
       - run:
           name: Deploy backend
