@@ -1,8 +1,11 @@
 version: 2.1
 executors:
-  node:
+  node-18:
     docker:
       - image: cimg/node:18.4.0
+  node-13:
+    docker:
+      - image: circleci/node:13.8.0
   aws:
     docker:
       - image: amazon/aws-cli
@@ -78,7 +81,7 @@ default-context: &default-context
 
 jobs:
   build-frontend:
-    executor: node
+    executor: node-13
     steps:
       - checkout
       - restore_cache:
@@ -98,7 +101,7 @@ jobs:
           template: basic_fail_1
 
   build-backend:
-    executor: node
+    executor: node-18
     steps:
       - checkout
       - restore_cache:
@@ -118,7 +121,7 @@ jobs:
           template: basic_fail_1
 
   test-frontend:
-      executor: node
+      executor: node-13
       steps:
         - checkout
         - restore_cache:
@@ -135,7 +138,7 @@ jobs:
             template: basic_fail_1
                 
   test-backend:
-    executor: node
+    executor: node-18
     steps:
       - checkout
       - restore_cache:
@@ -152,7 +155,7 @@ jobs:
           template: basic_fail_1
   
   scan-frontend:
-    executor: node
+    executor: node-13
     steps:
       - checkout
       - restore_cache:
@@ -169,7 +172,7 @@ jobs:
           template: basic_fail_1
 
   scan-backend:
-    executor: node
+    executor: node-18
     steps:
       - checkout
       - restore_cache:
@@ -262,7 +265,7 @@ jobs:
           template: basic_fail_1 
        
   run-migrations:
-    executor: node
+    executor: node-18
     steps:
       - checkout
       - run: 
@@ -305,7 +308,7 @@ jobs:
             yum update
             yum install python3 python3-pip tar gzip -y
             python3 -m pip install --user ansible
-            curl https://rpm.nodesource.com/setup_18.x | sudo bash -
+            curl https://rpm.nodesource.com/setup_13.x | sudo bash -
             yum install nodejs -y
             node --version
             npm --version
