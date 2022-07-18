@@ -285,10 +285,12 @@ jobs:
           name: Install dependencies
           command: |
             yum update
-            yum install python3 -y
-            # yum install nodejs:18 -y
-            # yum install npm -y
-            yum install ansible -y
+            yum install python3 python3-pip -y
+            python3 -m pip install --user ansible
+            curl -sL https://rpm.nodesource.com/setup_10.x | sudo bash -
+            yum install nodejs -y
+            node --version
+            npm --version
       # - run:
       #     name: Get backend url
       #     command: |
