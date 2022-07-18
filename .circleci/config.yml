@@ -285,11 +285,10 @@ jobs:
           name: Install dependencies
           command: |
             yum update
-            yum install curl
-            yum install python3 
-            yum install nodejs:18 
-            yum install npm 
-            yum install ansible
+            yum install python3 -y
+            yum install nodejs:18 -y
+            yum install npm -y
+            yum install ansible -y
       # - run:
       #     name: Get backend url
       #     command: |
