@@ -286,8 +286,8 @@ jobs:
           command: |
             yum update
             yum install python3 -y
-            yum install nodejs:18 -y
-            yum install npm -y
+            # yum install nodejs:18 -y
+            # yum install npm -y
             yum install ansible -y
       # - run:
       #     name: Get backend url
