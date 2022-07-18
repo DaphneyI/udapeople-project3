@@ -337,7 +337,7 @@ jobs:
           template: basic_fail_1 
                               
   deploy-backend:
-   executor: aws
+    executor: aws
     steps:
       - checkout
       - add_ssh_keys:
