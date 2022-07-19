@@ -349,9 +349,13 @@ jobs:
           template: basic_fail_1 
                               
   deploy-backend-build:
-    executor: node-18
+    docker:
+      - image: cimg/python:3.10-node
     steps:
       - checkout
+      - add_ssh_keys:
+          fingerprints: 
+            - "73:8a:d8:78:69:9c:49:a9:58:88:66:3c:d6:4b:08:ce"
       - run:
           name: install dependencies
           command: |
@@ -360,6 +364,14 @@ jobs:
             unzip awscliv2.zip
             sudo ./aws/install
             aws --version
+
+            # install ansible
+            sudo apt update && sudo apt upgrade --assume-yes
+            sudo apt install software-properties-common -y
+            sudo apt-add-repository ppa:ansible/ansible -y
+            sudo apt update 
+            sudo apt install ansible
+            ansible --version    
       - run:
           name: Deploy backend
           command: |
@@ -367,12 +379,9 @@ jobs:
             npm install
             npm run build
             cd ..
-            tar -C backend -czvf artifact.tar.gz /tmp/workspace
+            tar -C backend -czvf artifact.tar.gz .
+            mv artifact.tar.gz /tmp/workspace/artifact.tar.gz
             ls /tmp/workspace
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - artifact.tar.gz
       - configure-aws:
           event: "on_fail"
       - destroy-environment
@@ -381,20 +390,6 @@ jobs:
           channel: $SLACK_DEFAULT_CHANNEL
           event: fail
           template: basic_fail_1 
-            
-  deploy-backend:
-    executor: python-alpine
-    steps:
-      - checkout
-      - add_ssh_keys:
-          fingerprints: 
-            - "73:8a:d8:78:69:9c:49:a9:58:88:66:3c:d6:4b:08:ce"
-      - run:
-          name: Install dependencies
-          command: |
-            apk update && apk add --no-cache curl jq gzip tar ansible aws-cli
-      - attach_workspace:
-          at: /tmp/workspace
       - run:
           name: run ansible playbook
           command: |
@@ -453,12 +448,9 @@ workflows:
       - deploy-frontend:
           <<: *default-context
           requires: [run-migrations]
-      - deploy-backend-build:
-          <<: *default-context
-          requires: [run-migrations]
       - deploy-backend:
           <<: *default-context
-          requires: [deploy-backend-build]
+          requires: [run-migrations]
       # - revert
     
      
