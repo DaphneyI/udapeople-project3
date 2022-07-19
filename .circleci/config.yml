@@ -348,7 +348,7 @@ jobs:
           event: fail
           template: basic_fail_1 
                               
-  deploy-backend-build:
+  deploy-backend:
     docker:
       - image: cimg/python:3.10-node
     steps:
