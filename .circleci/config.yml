@@ -229,13 +229,14 @@ jobs:
       - run:
           name: Add backend ip to ansible inventory
           command: |
+            mkdir -p /tmp/workspace
             cd .circleci/ansible
             echo [all] > inventory
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --output text >> inventory
+            --output text >> /tmp/workspace/inventory
       - persist_to_workspace:
-          root: .circleci/ansible
+          root: /tmp/workspace
           paths:
             - inventory
       - destroy-environment  
@@ -256,14 +257,14 @@ jobs:
           command: |
             apk update && apk add --no-cache curl jq gzip tar ansible aws-cli
       - attach_workspace:
-          at: .circleci/ansible
+          at: /tmp/workspace
       - run:
           name: Configure server
           command: |
             cd .circleci/ansible
             ls
             cat inventory
-            ansible-playbook -i inventory configure-server.yml
+            ansible-playbook -i /tmp/workspace/inventory configure-server.yml
       - configure-aws:
           event: "on_fail"
       - destroy-environment
@@ -347,64 +348,10 @@ jobs:
           event: fail
           template: basic_fail_1 
                               
-  # deploy-backend:
-  #   docker: 
-  #     - image: cimg/python:3.10.5
-  #   steps:
-  #     - checkout
-  #     - add_ssh_keys:
-  #         fingerprints: 
-  #           - "73:8a:d8:78:69:9c:49:a9:58:88:66:3c:d6:4b:08:ce"
-  #     - run:
-  #         name: install dependencies
-  #         command: |
-  #           sudo apt update && sudo apt upgrade --assume-yes
-  #           sudo apt-add-repository ppa:ansible/ansible -y
-  #           sudo apt update 
-  #           sudo apt install ansible
-  #           ansible --version
-
-  #           # install aws cli
-  #           curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-  #           unzip awscliv2.zip
-  #           sudo ./aws/install
-  #           aws --version
-            
-  #           # install node 13
-  #           curl https://deb.nodesource.com/setup_13.x | sudo bash -
-  #           sudo apt install nodejs:13.8.0 -y
-  #           node --version
-  #           npm --version
-  #     - attach_workspace:
-  #         at: .circleci/ansible
-  #     - configure-aws
-  #     - run:
-  #         name: Deploy backend
-  #         command: |
-  #           cd backend
-  #           npm i
-  #           npm run build
-  #           cd ..
-  #           tar -C backend -czvf artifact.tar.gz .
-  #           cd .circleci/ansible
-  #           echo "Contents  of the inventory file is -------"
-  #           cat inventory
-            
-  #           ansible-playbook -i inventory deploy-backend.yml
-  #     - destroy-environment
-  #     - revert-migrations
-  #     - slack/notify:
-  #         channel: $SLACK_DEFAULT_CHANNEL
-  #         event: fail
-  #         template: basic_fail_1    
-
-  deploy-backend:
+  deploy-backend-build:
     executor: node-13
     steps:
       - checkout
-      - add_ssh_keys:
-          fingerprints: 
-            - "73:8a:d8:78:69:9c:49:a9:58:88:66:3c:d6:4b:08:ce"
       - run:
           name: install dependencies
           command: |
@@ -413,20 +360,6 @@ jobs:
             unzip awscliv2.zip
             sudo ./aws/install
             aws --version
-
-            # install ansible
-            sudo apt update && sudo apt upgrade --assume-yes
-            sudo apt install software-properties-common -y
-            sudo apt install python3
-            sudo apt-add-repository ppa:ansible/ansible -y
-            sudo apt update 
-            sudo apt install ansible
-            ansible --version
-
-            
-      - attach_workspace:
-          at: .circleci/ansible
-      - configure-aws
       - run:
           name: Deploy backend
           command: |
@@ -434,11 +367,43 @@ jobs:
             npm i
             npm run build
             cd ..
-            tar -C backend -czvf artifact.tar.gz .
+            tar -C backend -czvf artifact.tar.gz /tmp/workspace
+            ls /tmp/workspace
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - artifact.tar.gz
+      - configure-aws:
+          event: "on_fail"
+      - destroy-environment
+      - revert-migrations
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1 
+            
+  deploy-backend:
+    executor: python-alpine
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: 
+            - "73:8a:d8:78:69:9c:49:a9:58:88:66:3c:d6:4b:08:ce"
+      - run:
+          name: Install dependencies
+          command: |
+            apk update && apk add --no-cache curl jq gzip tar ansible aws-cli
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: run ansible playbook
+          command: |
             cd .circleci/ansible
             echo "Contents  of the inventory file is -------"
-            cat inventory 
-            ansible-playbook -i inventory deploy-backend.yml
+            cat /tmp/workspace/inventory 
+            ansible-playbook -i /tmp/workspace/inventory deploy-backend.yml
+      - configure-aws:
+          event: "on_fail"
       - destroy-environment
       - revert-migrations
       - slack/notify:
