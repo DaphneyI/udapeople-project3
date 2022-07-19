@@ -1,5 +1,8 @@
 version: 2.1
 executors:
+  python-alpine:
+    docker:
+      - image: python:3.10.5-alpine3.16
   node-18:
     docker:
       - image: cimg/node:18.4.0
@@ -242,8 +245,7 @@ jobs:
           template: basic_fail_1
 
   configure-infrastructure:
-    docker:
-      - image: python:3.10.5-alpine3.16
+    executor: python-alpine
     steps:
       - checkout
       - add_ssh_keys:
@@ -346,26 +348,22 @@ jobs:
           template: basic_fail_1 
                               
   deploy-backend:
-    executor: aws
+    executor: python-alpine
     steps:
       - checkout
-      - configure-aws
       - add_ssh_keys:
           fingerprints: 
             - "73:8a:d8:78:69:9c:49:a9:58:88:66:3c:d6:4b:08:ce"
       - run:
-          name: Install dependencies
+          name: install dependencies
           command: |
-            yum update
-            yum install python3 tar gzip -y
-            amazon-linux-extras install ansible -y
-            curl https://rpm.nodesource.com/setup_13.x | bash -
-            yum install nodejs -y
+            apk update && apk add --no-cache curl jq gzip tar ansible aws-cli nodejs npm
             node --version
             npm --version
             ansible --version
       - attach_workspace:
           at: .circleci/ansible
+      - configure-aws
       - run:
           name: Deploy backend
           command: |
