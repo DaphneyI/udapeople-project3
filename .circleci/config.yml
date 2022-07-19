@@ -231,7 +231,7 @@ jobs:
           command: |
             mkdir -p /tmp/workspace
             cd .circleci/ansible
-            echo [all] > inventory
+            echo [all] > /tmp/workspace/inventory
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --output text >> /tmp/workspace/inventory
@@ -353,6 +353,8 @@ jobs:
       - image: cimg/python:3.10
     steps:
       - checkout
+      - attach_workspace:
+          at: /tmp/workspace
       - add_ssh_keys:
           fingerprints: 
             - "73:8a:d8:78:69:9c:49:a9:58:88:66:3c:d6:4b:08:ce"
