@@ -304,6 +304,12 @@ jobs:
     steps:
       - checkout
       - run:
+          name: revert migration
+          command: |
+            cd backend
+            npm install
+            npm run migrations:revert
+      - run:
         name: Run migrations
         command: |
           cd backend
@@ -313,14 +319,13 @@ jobs:
           command: |
             pwd
             ls
-            grep "has been executed successfully" migrations_dump.txt
+            grep "has been executed successfully" backend/migrations_dump.txt
       - run:
           name: revert migration
           command: |
             cd backend
             npm install
             npm run migrations:revert
-          when: always
 
         
         
