@@ -348,7 +348,7 @@ jobs:
           template: basic_fail_1 
                               
   deploy-backend:
-    executor: python-alpine
+    executor: node-13
     steps:
       - checkout
       - add_ssh_keys:
@@ -357,12 +357,13 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            apk update && apk add curl jq gzip tar ansible aws-cli
-            curl -fLO \
-            https://github.com/oznu/alpine-node/releases/download/13.8.0/node-v13.8.0-linux-x86_64-alpine.tar.gz
-            tar -xzf node-v13.8.0-linux-x86_64-alpine.tar.gz -C /usr --strip-components=1 --no-same-owner
-            node --version
-            npm --version
+            sudo apt update
+            sudo apt install python3 ansible
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+            aws --version
+           
             ansible --version
             python3 --version
             aws --version
