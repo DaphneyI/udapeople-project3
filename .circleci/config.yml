@@ -367,23 +367,23 @@ jobs:
             ansible --version
             python3 --version
             aws --version
-      # - attach_workspace:
-      #     at: .circleci/ansible
-      # - configure-aws
-      # - run:
-      #     name: Deploy backend
-      #     command: |
-      #       cd backend
-      #       npm i
-      #       npm run build
-      #       cd ..
-      #       tar -C backend -czvf artifact.tar.gz .
-      #       cd .circleci/ansible
-      #       echo "Contents  of the inventory file is -------"
-      #       cat inventory
-      #       ansible-playbook -i inventory deploy-backend.yml
-      # - destroy-environment
-      # - revert-migrations
+      - attach_workspace:
+          at: .circleci/ansible
+      - configure-aws
+      - run:
+          name: Deploy backend
+          command: |
+            cd backend
+            npm i
+            npm run build
+            cd ..
+            tar -C backend -czvf artifact.tar.gz .
+            cd .circleci/ansible
+            echo "Contents  of the inventory file is -------"
+            cat inventory
+            ansible-playbook -i inventory deploy-backend.yml
+      - destroy-environment
+      - revert-migrations
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: fail
@@ -431,9 +431,9 @@ workflows:
       # - deploy-frontend:
       #     <<: *default-context
       #     requires: [run-migrations]
-      - deploy-backend:
-          <<: *default-context
+      # - deploy-backend:
+          # <<: *default-context
           # requires: [run-migrations]
-      # - revert
+      - revert
     
      
