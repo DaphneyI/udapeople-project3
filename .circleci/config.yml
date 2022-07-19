@@ -443,7 +443,7 @@ workflows:
       #     <<: *default-context
       #     requires: [run-migrations]
       - deploy-backend:
-          # <<: *default-context
+          <<: *default-context
           # requires: [run-migrations]
       # - revert
     
