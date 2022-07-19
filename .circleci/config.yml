@@ -348,8 +348,7 @@ jobs:
           template: basic_fail_1 
                               
   deploy-backend:
-    docker:
-      - image: node:13-alpine3.11
+    executor: python-alpine
     steps:
       - checkout
       - add_ssh_keys:
@@ -358,10 +357,7 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            apk update && apk add python3 curl jq gzip tar ansible unzip
-            curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
-            unzip awscli-bundle.zip
-            ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws 
+            apk update && apk add curl jq gzip tar ansible aws-cli nodejs:13.8.0
             node --version
             npm --version
             ansible --version
