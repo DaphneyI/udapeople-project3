@@ -288,7 +288,7 @@ jobs:
             if grep -q "has been executed successfully" backend/migrations_dump.txt
             then
               echo "persisting to kvdb"
-              curl https://kvdb.io/P8Xcc73g9yAfoYt7Cqb7Qs/migration_${CIRCLE_WORKFLOW_ID:0:5}  -d '1'
+              curl -k https://kvdb.io/P8Xcc73g9yAfoYt7Cqb7Qs/migration_${CIRCLE_WORKFLOW_ID:0:5}  -d '1'
             fi
       - configure-aws:
           event: "on_fail"
@@ -298,6 +298,18 @@ jobs:
           channel: $SLACK_DEFAULT_CHANNEL
           event: fail
           template: basic_fail_1
+  
+  revert:
+    executor: node-13
+    steps:
+      - checkout
+      - run:
+          command: |
+              echo "reverting migration"
+              cd backend
+              npm install
+              npm run migrations:revert
+
 
   deploy-frontend:
     executor: aws
@@ -404,8 +416,8 @@ workflows:
       # - configure-infrastructure:
       #     <<: *default-context
       #     requires: [deploy-infrastructure] 
-      - run-migrations:
-          <<: *default-context
+      # - run-migrations:
+          # <<: *default-context
       #     requires: [configure-infrastructure]
       # - deploy-frontend:
       #     <<: *default-context
@@ -413,5 +425,6 @@ workflows:
       # - deploy-backend:
       #     <<: *default-context
       #     requires: [run-migrations]
+      - revert
     
      
