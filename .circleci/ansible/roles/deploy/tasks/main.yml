@@ -6,8 +6,7 @@
     mode: '0755'
   register: create_dir
 
-- debug:
-    var: create_dir.stdout_lines
+
 
 - name: Extract backend files into /etc/node_project
   unarchive:
@@ -16,16 +15,17 @@
   register: untar
 
 - debug:
-    var: untar.stdout_lines
+    var: untar
 
 - name: serve file
   shell: |
+    cd backend
     npm install
     pm2 stop default
     pm2 start npm -- start
   args:
-    chdir: /etc/node_project/backend
+    chdir: /etc/node_project
   register: serve
 
 - debug:
-    var: serve.stdout_lines
+    var: serve
