@@ -359,11 +359,14 @@ jobs:
           name: install dependencies
           command: |
             apk update && apk add python3
-            apk add --no-cache curl jq gzip tar ansible aws-cli 
+            apk add curl jq gzip tar 
+            apk add ansible 
+            apk add aws-cli 
             node --version
             npm --version
             ansible --version
             python3 --version
+            aws --version
       # - attach_workspace:
       #     at: .circleci/ansible
       # - configure-aws
