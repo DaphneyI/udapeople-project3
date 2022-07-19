@@ -302,7 +302,7 @@ jobs:
   test:
     executor: node-13
     steps:
-    #   - checkout
+      - checkout
     #   - run:
     #       name: Run migrations
     #       command: |
