@@ -7,7 +7,7 @@
 
 - name: Extract backend files into /etc/node_project
   unarchive:
-    src: ../../artifact.tar.gz 
+    src: /tmp/workspace/artifact.tar.gz 
     dest: /etc/node_project
 
 - name: serve file

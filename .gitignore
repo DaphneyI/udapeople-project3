@@ -71,3 +71,4 @@ node_modules
 dist
 dbpass
 Dockerfile
+.circleci/ansible/ansible.cfg
