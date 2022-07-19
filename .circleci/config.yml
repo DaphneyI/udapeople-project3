@@ -312,6 +312,7 @@ jobs:
       - run:
           command: |
             cat backend/migrations_dump.txt
+            grep -q "grep -q "has been executed successfully" backend/migrations.txt
       - run:
           name: revert migration
           command: |
