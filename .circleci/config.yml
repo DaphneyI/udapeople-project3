@@ -359,9 +359,7 @@ jobs:
           name: install dependencies
           command: |
             sudo apt update && sudo apt upgrade --assume-yes
-            sudo apt install ansible
-            sudo apt install software-properties-common --assume-yes
-            sudo apt-add-repository ppa:ansible/ansible --assume-yes
+            sudo apt-add-repository ppa:ansible/ansible -y
             sudo apt update 
             sudo apt install ansible
             ansible --version
