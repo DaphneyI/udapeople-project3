@@ -311,12 +311,7 @@ jobs:
             npm run migrations > migrations_dump.txt
       - run:
           command: |
-            grep -qF "has been executed successfully" backend/migrations_dump.txt
-      
-  revert:
-    executor: node-18
-    steps:
-      - checkout
+            less backend/migrations_dump.txt
       - run:
           name: revert migration
           command: |
@@ -444,5 +439,5 @@ workflows:
       #     <<: *default-context
       #     requires: [run-migrations]
       -  test
-      - revert
+    
      
