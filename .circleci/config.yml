@@ -80,16 +80,6 @@ default-context: &default-context
     - udacity-project-3
 
 jobs:
-  revert:
-    executor: node-18
-    steps:
-      - checkout
-      - run:
-          command: |
-            cd backend
-            npm install
-            npm run migrations:revert
-
   build-frontend:
     executor: node-13
     steps:
@@ -308,6 +298,35 @@ jobs:
           event: fail
           template: basic_fail_1
 
+
+  test:
+    executor: node-18
+    steps:
+      - checkout
+      - run:
+        name: Run migrations
+        command: |
+          cd backend
+          npm install
+          npm run migrations > migrations_dump.txt
+      - run:
+          command: |
+            pwd
+            ls
+            grep "has been executed successfully" migrations_dump.txt
+      - run:
+          name: revert migration
+          command: |
+            cd backend
+            npm install
+            npm run migrations:revert
+          when: always
+
+        
+        
+
+
+
   deploy-frontend:
     executor: aws
     steps:
@@ -422,5 +441,5 @@ workflows:
       # - deploy-backend:
       #     <<: *default-context
       #     requires: [run-migrations]
-      -  revert
+      -  test
      
