@@ -320,6 +320,11 @@ jobs:
             pwd
             ls
             grep "has been executed successfully" backend/migrations_dump.txt
+      
+  revert:
+    executor: node-18
+    steps:
+      - checkout
       - run:
           name: revert migration
           command: |
@@ -447,4 +452,6 @@ workflows:
       #     <<: *default-context
       #     requires: [run-migrations]
       -  test
+      - revert:
+          requires: [test]
      
