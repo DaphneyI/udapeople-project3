@@ -350,7 +350,7 @@ jobs:
                               
   deploy-backend:
     docker:
-      - image: cimg/python:3.10-node
+      - image: cimg/python:3.10
     steps:
       - checkout
       - add_ssh_keys:
@@ -371,7 +371,13 @@ jobs:
             sudo apt-add-repository ppa:ansible/ansible -y
             sudo apt update 
             sudo apt install ansible
-            ansible --version    
+            ansible --version   
+
+            # install node 13
+            curl https://deb.nodesource.com/setup_13.x | sudo bash -
+            sudo apt install nodejs -y
+            node --version
+            npm --version 
       - run:
           name: Deploy backend
           command: |
@@ -382,29 +388,29 @@ jobs:
             tar -C backend -czvf artifact.tar.gz .
             mv artifact.tar.gz /tmp/workspace/artifact.tar.gz
             ls /tmp/workspace
-      - configure-aws:
-          event: "on_fail"
-      - destroy-environment
-      - revert-migrations
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          event: fail
-          template: basic_fail_1 
-      - run:
-          name: run ansible playbook
-          command: |
-            cd .circleci/ansible
-            echo "Contents  of the inventory file is -------"
-            cat /tmp/workspace/inventory 
-            ansible-playbook -i /tmp/workspace/inventory deploy-backend.yml
-      - configure-aws:
-          event: "on_fail"
-      - destroy-environment
-      - revert-migrations
-      - slack/notify:
-          channel: $SLACK_DEFAULT_CHANNEL
-          event: fail
-          template: basic_fail_1    
+      # - configure-aws:
+      #     event: "on_fail"
+      # - destroy-environment
+      # - revert-migrations
+      # - slack/notify:
+      #     channel: $SLACK_DEFAULT_CHANNEL
+      #     event: fail
+      #     template: basic_fail_1 
+      # - run:
+      #     name: run ansible playbook
+      #     command: |
+      #       cd .circleci/ansible
+      #       echo "Contents  of the inventory file is -------"
+      #       cat /tmp/workspace/inventory 
+      #       ansible-playbook -i /tmp/workspace/inventory deploy-backend.yml
+      # - configure-aws:
+      #     event: "on_fail"
+      # - destroy-environment
+      # - revert-migrations
+      # - slack/notify:
+      #     channel: $SLACK_DEFAULT_CHANNEL
+      #     event: fail
+      #     template: basic_fail_1    
 
   revert:
     executor: node-13
@@ -420,37 +426,37 @@ jobs:
 workflows:
   my_workflow:
     jobs:
-      - build-frontend:
-          <<: *default-context
-      - build-backend:
-          <<: *default-context
-      - test-frontend:
-          <<: *default-context
-          requires: [build-frontend]
-      - test-backend:
-          <<: *default-context
-          requires: [build-backend]
-      - scan-frontend:
-          <<: *default-context
-          requires: [build-frontend]
-      - scan-backend:
-          <<: *default-context
-          requires: [build-backend]
-      - deploy-infrastructure:
-         <<: *default-context
-         requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      - configure-infrastructure:
-          <<: *default-context
-          requires: [deploy-infrastructure] 
-      - run-migrations:
-          <<: *default-context
-          requires: [configure-infrastructure]
-      - deploy-frontend:
-          <<: *default-context
-          requires: [run-migrations]
+      # - build-frontend:
+      #     <<: *default-context
+      # - build-backend:
+      #     <<: *default-context
+      # - test-frontend:
+      #     <<: *default-context
+      #     requires: [build-frontend]
+      # - test-backend:
+      #     <<: *default-context
+      #     requires: [build-backend]
+      # - scan-frontend:
+      #     <<: *default-context
+      #     requires: [build-frontend]
+      # - scan-backend:
+      #     <<: *default-context
+      #     requires: [build-backend]
+      # - deploy-infrastructure:
+      #    <<: *default-context
+      #    requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      # - configure-infrastructure:
+      #     <<: *default-context
+      #     requires: [deploy-infrastructure] 
+      # - run-migrations:
+      #     <<: *default-context
+      #     requires: [configure-infrastructure]
+      # - deploy-frontend:
+      #     <<: *default-context
+      #     requires: [run-migrations]
       - deploy-backend:
           <<: *default-context
-          requires: [run-migrations]
+          # requires: [run-migrations]
       
     
      
