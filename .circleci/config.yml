@@ -363,7 +363,6 @@ jobs:
             unzip awscliv2.zip
             sudo ./aws/install
             aws --version
-           
             ansible --version
             python3 --version
             aws --version
