@@ -4,11 +4,19 @@
     path: /etc/node_project
     state: directory
     mode: '0755'
+  register: create_dir
+
+- debug:
+    var: create_dir.stdout_lines
 
 - name: Extract backend files into /etc/node_project
   unarchive:
     src: /tmp/artifact.tar.gz 
     dest: /etc/node_project
+  register: untar
+
+- debug:
+    var: untar.stdout_lines
 
 - name: serve file
   shell: |
@@ -17,3 +25,7 @@
     pm2 start npm -- start
   args:
     chdir: /etc/node_project/backend
+  register: serve
+
+- debug:
+    var: serve.stdout_lines
