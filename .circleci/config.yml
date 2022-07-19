@@ -81,7 +81,7 @@ default-context: &default-context
 
 jobs:
   revert:
-    executor: node-13
+    executor: node-18
     steps:
       - checkout
       - run:
