@@ -301,7 +301,7 @@ jobs:
 
   test:
     executor: node-13
-    # steps:
+    steps:
     #   - checkout
     #   - run:
     #       name: Run migrations
