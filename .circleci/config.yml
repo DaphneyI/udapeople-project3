@@ -311,7 +311,7 @@ jobs:
             npm run migrations > migrations_dump.txt
       - run:
           command: |
-            less backend/migrations_dump.txt
+            cat backend/migrations_dump.txt
       - run:
           name: revert migration
           command: |
