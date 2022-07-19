@@ -357,7 +357,10 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            apk update && apk add curl jq gzip tar ansible aws-cli nodejs:13.8.0
+            apk update && apk add curl jq gzip tar ansible aws-cli
+            curl -fLO \
+            https://github.com/oznu/alpine-node/releases/download/13.8.0/node-v13.8.0-linux-x86_64-alpine.tar.gz
+            tar -xzf node-v13.8.0-linux-x86_64-alpine.tar.gz -C /usr --strip-components=1 --no-same-owner
             node --version
             npm --version
             ansible --version
