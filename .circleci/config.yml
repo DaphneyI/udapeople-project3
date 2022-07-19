@@ -263,7 +263,7 @@ jobs:
           command: |
             cd .circleci/ansible
             ls
-            cat inventory
+            cat /tmp/workspace/inventory
             ansible-playbook -i /tmp/workspace/inventory configure-server.yml
       - configure-aws:
           event: "on_fail"
