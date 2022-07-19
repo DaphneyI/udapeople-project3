@@ -73,7 +73,7 @@ commands:
               npm install
               npm run migrations:revert
             fi
-          when: on_fail
+          # when: on_fail
 
 # use yaml syntax to reduce redundancy when defining context 
 default-context: &default-context
@@ -290,10 +290,10 @@ jobs:
               echo "persisting to kvdb"
               curl -k https://kvdb.io/P8Xcc73g9yAfoYt7Cqb7Qs/migration_${CIRCLE_WORKFLOW_ID:0:5}  -d '1'
             fi
+      - revert-migrations
       - configure-aws:
           event: "on_fail"
       - destroy-environment
-      - revert-migrations
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: fail
@@ -416,8 +416,8 @@ workflows:
       # - configure-infrastructure:
       #     <<: *default-context
       #     requires: [deploy-infrastructure] 
-      # - run-migrations:
-          # <<: *default-context
+      - run-migrations:
+          <<: *default-context
       #     requires: [configure-infrastructure]
       # - deploy-frontend:
       #     <<: *default-context
@@ -425,6 +425,6 @@ workflows:
       # - deploy-backend:
       #     <<: *default-context
       #     requires: [run-migrations]
-      - revert
+      # - revert
     
      
