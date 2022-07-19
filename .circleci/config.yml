@@ -358,7 +358,7 @@ jobs:
           command: |
             yum update
             yum install python3 tar gzip -y
-            amazon-linux-extras install ansible2 -y
+            amazon-linux-extras install ansible -y
             curl https://rpm.nodesource.com/setup_13.x | bash -
             yum install nodejs -y
             node --version
@@ -376,7 +376,7 @@ jobs:
             tar -C backend -czvf artifact.tar.gz .
             cd .circleci/ansible
             echo "Contents  of the inventory file is -------"
-            cat inventory.txt
+            cat inventory
             ansible-playbook -i inventory deploy-backend.yml
       - destroy-environment
       - revert-migrations
