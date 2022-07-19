@@ -386,8 +386,7 @@ jobs:
             npm run build
             cd ..
             tar -C backend -czvf artifact.tar.gz .
-            ls 
-            ls /
+            mv artifact.tar.gz /tmp
             ls /tmp
       # - configure-aws:
       #     event: "on_fail"
