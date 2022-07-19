@@ -379,39 +379,51 @@ jobs:
           event: fail
           template: basic_fail_1    
 
+  revert:
+    executor: node-13
+    steps:
+      - checkout
+      - run:
+          command: |
+            echo "reverting migration"
+            cd backend
+            npm install
+            npm run migrations:revert
+
 workflows:
   my_workflow:
     jobs:
-      - build-frontend:
-          <<: *default-context
-      - build-backend:
-          <<: *default-context
-      - test-frontend:
-          <<: *default-context
-          requires: [build-frontend]
-      - test-backend:
-          <<: *default-context
-          requires: [build-backend]
-      - scan-frontend:
-          <<: *default-context
-          requires: [build-frontend]
-      - scan-backend:
-          <<: *default-context
-          requires: [build-backend]
-      - deploy-infrastructure:
-         <<: *default-context
-         requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      - configure-infrastructure:
-          <<: *default-context
-          requires: [deploy-infrastructure] 
-      - run-migrations:
-          <<: *default-context
-          requires: [configure-infrastructure]
-      - deploy-frontend:
-          <<: *default-context
-          requires: [run-migrations]
-      - deploy-backend:
-          <<: *default-context
-          requires: [run-migrations]
+      # - build-frontend:
+      #     <<: *default-context
+      # - build-backend:
+      #     <<: *default-context
+      # - test-frontend:
+      #     <<: *default-context
+      #     requires: [build-frontend]
+      # - test-backend:
+      #     <<: *default-context
+      #     requires: [build-backend]
+      # - scan-frontend:
+      #     <<: *default-context
+      #     requires: [build-frontend]
+      # - scan-backend:
+      #     <<: *default-context
+      #     requires: [build-backend]
+      # - deploy-infrastructure:
+      #    <<: *default-context
+      #    requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      # - configure-infrastructure:
+      #     <<: *default-context
+      #     requires: [deploy-infrastructure] 
+      # - run-migrations:
+      #     <<: *default-context
+      #     requires: [configure-infrastructure]
+      # - deploy-frontend:
+      #     <<: *default-context
+      #     requires: [run-migrations]
+      # - deploy-backend:
+      #     <<: *default-context
+      #     requires: [run-migrations]
+      - revert
     
      
