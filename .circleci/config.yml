@@ -359,7 +359,7 @@ jobs:
           name: install dependencies
           command: |
             apk update && apk add python3
-            apk --no-cache curl jq gzip tar ansible aws-cli 
+            apk add --no-cache curl jq gzip tar ansible aws-cli 
             node --version
             npm --version
             ansible --version
