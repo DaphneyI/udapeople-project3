@@ -357,7 +357,9 @@ jobs:
           name: Install dependencies
           command: |
             yum update
-            yum install python3 ansible tar gzip -y
+            yum install python3 tar gzip -y
+            yum install epel-release
+            yum install ansible
             curl https://rpm.nodesource.com/setup_13.x | bash -
             yum install nodejs -y
             node --version
