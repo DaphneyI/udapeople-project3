@@ -416,6 +416,7 @@ jobs:
 
             # install ansible
             sudo apt update && sudo apt upgrade --assume-yes
+            sudo apt install software-properties-common -y
             sudo apt install python3
             sudo apt-add-repository ppa:ansible/ansible -y
             sudo apt update 
