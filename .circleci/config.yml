@@ -358,10 +358,10 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            apk update && apk add python3
-            apk add curl jq gzip tar 
-            apk add ansible 
-            apk add aws-cli 
+            apk update && apk add python3 curl jq gzip tar ansible unzip
+            curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+            unzip awscli-bundle.zip
+            ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws 
             node --version
             npm --version
             ansible --version
