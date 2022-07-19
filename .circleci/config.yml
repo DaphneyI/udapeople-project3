@@ -358,8 +358,7 @@ jobs:
           command: |
             yum update
             yum install python3 tar gzip -y
-            yum install epel-release
-            yum install ansible
+            amazon-linux-extras install ansible2 -y
             curl https://rpm.nodesource.com/setup_13.x | bash -
             yum install nodejs -y
             node --version
