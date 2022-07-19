@@ -453,9 +453,12 @@ workflows:
       - deploy-frontend:
           <<: *default-context
           requires: [run-migrations]
-      - deploy-backend:
+      - deploy-backend-build:
           <<: *default-context
           requires: [run-migrations]
+      - deploy-backend:
+          <<: *default-context
+          requires: [deploy-backend-build]
       # - revert
     
      
