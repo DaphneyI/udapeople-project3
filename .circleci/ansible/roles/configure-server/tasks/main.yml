@@ -19,13 +19,9 @@
     update_cache: yes
     name: nodejs
 
-- name: install pm2
+- name: check npm version
   shell: npm --version
-  register: check-npm
 
-- name: print npm output
-  debug: 
-    var: check-npm
 
 - name: install pm2
   shell: npm install pm2 -g 
