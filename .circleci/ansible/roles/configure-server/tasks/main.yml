@@ -9,7 +9,12 @@
 
 - name: install nodejs repo for version 13x
   shell: |
-    curl https://deb.nodesource.com/setup_13.x | sudo bash -
+    curl https://deb.nodesource.com/setup_13.x -o setup_13x.sh
+    chmod +x setup_13x.sh
+    setup_13x.sh
+  args:
+    executable: /bin/bash
+    
 
 - name: install nodejs with apt
   apt:
@@ -17,4 +22,12 @@
     name: nodejs
 
 - name: install pm2
-  command: npm install pm2 -g 
+  shell: npm --version
+  register: check-npm
+
+- name: print npm output
+  debug: 
+    var: check-npm
+
+- name: install pm2
+  shell: npm install pm2 -g 
