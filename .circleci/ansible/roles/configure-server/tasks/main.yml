@@ -9,9 +9,7 @@
 
 - name: install nodejs repo for version 13x
   shell: |
-    curl https://deb.nodesource.com/setup_13.x -o setup_13x.sh
-    chmod +x setup_13x.sh
-    setup_13x.sh
+    curl https://deb.nodesource.com/setup_13.x | sudo bash -
   args:
     executable: /bin/bash
     
