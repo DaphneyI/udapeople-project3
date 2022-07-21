@@ -528,25 +528,20 @@ workflows:
     jobs:
       - build-frontend:
           <<: *slack-context
-          <<: *filter-dev
       - build-backend:
           <<: *slack-context
-          <<: *filter-dev
       - test-frontend:
           <<: *slack-context
-          <<: *filter-dev
           requires: [build-frontend]
       - test-backend:
           <<: *slack-context
-          <<: *filter-dev
           requires: [build-backend]
       - scan-frontend:
           <<: *slack-context
-          <<: *filter-dev
           requires: [build-frontend]
       - scan-backend:
           <<: *slack-context
-          <<: *filter-dev
+          
           requires: [build-backend]
       - deploy-infrastructure:
          <<: *slack-context
