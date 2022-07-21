@@ -11,17 +11,12 @@
   shell: |
     curl https://deb.nodesource.com/setup_13.x | sudo bash -
   args:
-    executable: /bin/bash
-    
+    executable: /bin/bash  
 
 - name: install nodejs with apt
   apt:
     update_cache: yes
     name: nodejs
-
-- name: check npm version
-  shell: npm --version
-
 
 - name: install pm2
   shell: npm install pm2 -g 
