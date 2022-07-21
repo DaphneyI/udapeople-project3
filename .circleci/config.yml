@@ -521,6 +521,9 @@ workflows:
       - smoke-test:
           <<: *default-context
           requires: [deploy-frontend, deploy-backend]
+      - cloudfront-update:
+          <<: *default-context
+          requires: [smoke-test]
 
     
      
