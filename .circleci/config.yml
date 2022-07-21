@@ -247,6 +247,7 @@ jobs:
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --output text >> /tmp/workspace/inventory
+            cat /tmp/workspace/inventory
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
@@ -341,6 +342,8 @@ jobs:
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            cd frontend
+            ls -la
             cat frontend/.env
       - run:
           name: Deploy frontend objects
@@ -524,56 +527,56 @@ jobs:
 workflows:
   my_workflow:
     jobs:
-      # - build-frontend:
-      #     <<: *slack-context
-      # - build-backend:
-      #     <<: *slack-context
-      # - test-frontend:
-      #     <<: *slack-context
-      #     requires: [build-frontend]
-      # - test-backend:
-      #     <<: *slack-context
-      #     requires: [build-backend]
-      # - scan-frontend:
-      #     <<: *slack-context
-      #     requires: [build-frontend]
-      # - scan-backend:
-      #     <<: *slack-context
-      #     requires: [build-backend]
+      - build-frontend:
+          <<: *slack-context
+      - build-backend:
+          <<: *slack-context
+      - test-frontend:
+          <<: *slack-context
+          requires: [build-frontend]
+      - test-backend:
+          <<: *slack-context
+          requires: [build-backend]
+      - scan-frontend:
+          <<: *slack-context
+          requires: [build-frontend]
+      - scan-backend:
+          <<: *slack-context
+          requires: [build-backend]
       - deploy-infrastructure:
          <<: *slack-context
         #  <<: *filter-main
-        #  requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      # - configure-infrastructure:
-      #     <<: *slack-context
-      #     <<: *filter-main
-      #     requires: [deploy-infrastructure] 
-      # - run-migrations:
-      #     <<: *slack-context
-      #     <<: *filter-main
-      #     requires: [configure-infrastructure]
+         requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      - configure-infrastructure:
+          <<: *slack-context
+          # <<: *filter-main
+          requires: [deploy-infrastructure] 
+      - run-migrations:
+          <<: *slack-context
+          # <<: *filter-main
+          requires: [configure-infrastructure]
       - deploy-frontend:
           <<: *slack-context
           requires: [deploy-infrastructure]
           # <<: *filter-main
-          # requires: [run-migrations]
+          requires: [run-migrations]
       - deploy-backend:
           <<: *slack-context
           requires: [deploy-infrastructure]
           # <<: *filter-main
-      #     requires: [run-migrations]
-      # - smoke-test:
-      #     <<: *slack-context
-      #     <<: *filter-main
-      #     requires: [deploy-frontend, deploy-backend]
-      # - cloudfront-update:
-      #     <<: *slack-context
-      #     <<: *filter-main
-      #     requires: [smoke-test]
-      # - cleanup:
-      #     <<: *slack-context
-      #     <<: *filter-main
-      #     requires: [cloudfront-update]
+          requires: [run-migrations]
+      - smoke-test:
+          <<: *slack-context
+          # <<: *filter-main
+          requires: [deploy-frontend, deploy-backend]
+      - cloudfront-update:
+          <<: *slack-context
+          # <<: *filter-main
+          requires: [smoke-test]
+      - cleanup:
+          <<: *slack-context
+          # <<: *filter-main
+          requires: [cloudfront-update]
 
     
      
