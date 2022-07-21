@@ -411,6 +411,8 @@ jobs:
     executor: python-alpine
     steps:
       - run: 
+          command: apk add curl
+      - run: 
           command: |
             API_URL="http://35.87.198.102:3030" 
             curl "${API_URL}/api/status"
