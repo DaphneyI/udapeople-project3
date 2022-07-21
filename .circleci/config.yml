@@ -436,8 +436,7 @@ jobs:
             echo ${URL} 
             if curl -s ${URL} | grep "Welcome"
             then
-                # Change this to 0 after the job fails
-              exit 1
+              exit 0
             else
               exit 1
             fi
@@ -446,7 +445,43 @@ jobs:
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
           event: fail
-          template: basic_fail_1  
+          template: basic_fail_1 
+
+  cloudfront-update:
+    executor: aws
+    steps:
+      - checkout 
+      - run:
+          name: Install dependencies
+          command: |
+            yum install tar gzip -y
+            curl https://rpm.nodesource.com/setup_13.x | bash -
+            yum install nodejs -y
+            node --version
+            npm --version
+      - configure-aws
+      - run:
+          name: Update cloudfront distribution
+          command: |
+            # get the old workflow id
+            OldWorkflowID=$(aws cloudformation list-exports \
+            --query "Exports[?Name==\`WorkflowID\`].Value" \
+            --no-paginate --output text)
+            echo $OldWorkflowID
+
+            # update the cloudfront distro
+            aws cloudformation deploy \
+            --template-file .circleci/files/cloudfront.yml \
+            --stack-name udapeople-${OldWorkflowID} \
+            --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:5}" \
+            --tags project=udapeople
+      - destroy-environment
+      - revert-migrations
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1   
+ 
 
 
 workflows:
