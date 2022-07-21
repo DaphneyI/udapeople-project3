@@ -88,6 +88,18 @@ default-context: &default-context
   context:
     - udacity-project-3
 
+filter-main: &filter-main
+  filters:
+    branches:
+      only:
+        - main
+
+filter-dev: &filter-dev
+  filters:
+    branches:
+      only:
+        - dev
+
 jobs:
   build-frontend:
     executor: node-13
@@ -481,49 +493,93 @@ jobs:
           channel: $SLACK_DEFAULT_CHANNEL
           event: fail
           template: basic_fail_1   
+
+  cleanup:
+    executor: aws
+    steps:
+      - checkout
+      - configure-aws
+      - run:
+          name: Get old stack workflow id
+          command: |
+            # Fetch the Old workflow ID
+            export OldWorkflowID=$(aws cloudformation \
+            list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+            --no-paginate --output text)
+            echo "OldWorkflowID is ${OldWorkflowID}"
+
+            # Fetch the stack names          
+            export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
+            --stack-status-filter CREATE_COMPLETE --no-paginate --output text)) 
+            echo "Stack names = ${STACKS[@]}"          
+
+            # remove old stack
+            if [[ "${CIRCLE_WORKFLOW_1D:0:5}" != "${OldWorkflowID}" ]] && [[ "${OldWorkflowID}" =~ "${STACKS[@]}" ]]
+            then
+              aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
+              aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
+              aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
+            fi
  
 
 
 workflows:
   my_workflow:
     jobs:
-      # - build-frontend:
-      #     <<: *default-context
-      # - build-backend:
-      #     <<: *default-context
-      # - test-frontend:
-      #     <<: *default-context
-      #     requires: [build-frontend]
-      # - test-backend:
-      #     <<: *default-context
-      #     requires: [build-backend]
-      # - scan-frontend:
-      #     <<: *default-context
-      #     requires: [build-frontend]
-      # - scan-backend:
-      #     <<: *default-context
-      #     requires: [build-backend]
+      - build-frontend:
+          <<: *default-context
+          <<: *filter-dev
+      - build-backend:
+          <<: *default-context
+          <<: *filter-dev
+      - test-frontend:
+          <<: *default-context
+          <<: *filter-dev
+          requires: [build-frontend]
+      - test-backend:
+          <<: *default-context
+          <<: *filter-dev
+          requires: [build-backend]
+      - scan-frontend:
+          <<: *default-context
+          <<: *filter-dev
+          requires: [build-frontend]
+      - scan-backend:
+          <<: *default-context
+          <<: *filter-dev
+          requires: [build-backend]
       - deploy-infrastructure:
          <<: *default-context
-      #    requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+         <<: *filter-main
+         requires: [test-frontend, test-backend, scan-frontend, scan-backend]
       - configure-infrastructure:
           <<: *default-context
+          <<: *filter-main
           requires: [deploy-infrastructure] 
       - run-migrations:
           <<: *default-context
+          <<: *filter-main
           requires: [configure-infrastructure]
       - deploy-frontend:
           <<: *default-context
+          <<: *filter-main
           requires: [run-migrations]
       - deploy-backend:
           <<: *default-context
+          <<: *filter-main
           requires: [run-migrations]
       - smoke-test:
           <<: *default-context
+          <<: *filter-main
           requires: [deploy-frontend, deploy-backend]
       - cloudfront-update:
           <<: *default-context
+          <<: *filter-main
           requires: [smoke-test]
+      - cleanup:
+          <<: *default-context
+          <<: *filter-main
+          requires: [cloudfront-update]
 
     
      
