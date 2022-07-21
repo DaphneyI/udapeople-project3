@@ -414,10 +414,10 @@ jobs:
     executor: python-alpine
     steps:
       - checkout
-       - run:
-          name: Install dependencies
-          command: |
-            apk update && apk add --no-cache curl aws-cli
+      - run:
+        name: Install dependencies
+        command: |
+          apk update && apk add --no-cache curl aws-cli
       - run:
           name: Get backend url
           command: |
