@@ -400,16 +400,6 @@ jobs:
           event: fail
           template: basic_fail_1   
 
-  # smoke-test:
-  #   executor: python-alpine
-  #   steps:
-  #     - run: 
-  #         command: apk add curl
-  #     - run: 
-  #         command: |
-  #           API_URL="http://35.87.198.102:3030" 
-  #           curl "${API_URL}/api/status"
-
   smoke-test:
     executor: python-alpine
     steps:
@@ -439,18 +429,18 @@ jobs:
             else
                 exit 1
             fi
-      # - run:
-      #     name: Frontend smoke test.
-      #     command: |
-      #       URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:5}.s3-website-us-west-2.amazonaws.com/#/employees"            
-      #       echo ${URL} 
-      #       if curl -s ${URL} | grep "Welcome"
-      #       then
-      #           # Change this to 0 after the job fails
-      #         exit 1
-      #       else
-      #         exit 1
-      #       fi
+      - run:
+          name: Frontend smoke test.
+          command: |
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:5}.s3-website-us-west-2.amazonaws.com/#/employees"            
+            echo ${URL} 
+            if curl -s ${URL} | grep "Welcome"
+            then
+                # Change this to 0 after the job fails
+              exit 1
+            else
+              exit 1
+            fi
       - destroy-environment
       - revert-migrations
       - slack/notify:
@@ -487,16 +477,15 @@ workflows:
       - run-migrations:
           <<: *default-context
           requires: [configure-infrastructure]
-      # - deploy-frontend:
-      #     <<: *default-context
-      #     requires: [run-migrations]
+      - deploy-frontend:
+          <<: *default-context
+          requires: [run-migrations]
       - deploy-backend:
           <<: *default-context
           requires: [run-migrations]
       - smoke-test:
           <<: *default-context
-          requires: [deploy-backend]
-          # requires: [deploy-frontend, deploy-backend]
+          requires: [deploy-frontend, deploy-backend]
       
     
      
