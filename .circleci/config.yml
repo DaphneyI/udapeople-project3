@@ -410,8 +410,10 @@ jobs:
   smoke-test:
     executor: python-alpine
     steps:
-      API_URL="http://35.87.198.102:3030" 
-      curl "${API_URL}/api/status"
+      - run: 
+          command: |
+            API_URL="http://35.87.198.102:3030" 
+            curl "${API_URL}/api/status"
 
   # smoke-test:
   #   executor: node-13
