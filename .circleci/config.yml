@@ -415,9 +415,9 @@ jobs:
     steps:
       - checkout
       - run:
-        name: Install dependencies
-        command: |
-          apk update && apk add --no-cache curl aws-cli
+          name: Install dependencies
+          command: |
+            apk update && apk add --no-cache curl aws-cli
       - run:
           name: Get backend url
           command: |
