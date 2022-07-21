@@ -432,11 +432,12 @@ jobs:
             export BACKEND_IP=$(cat backend_ip.txt)
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
+            sleep 20s
             if curl "${API_URL}/api/status" | grep "ok"
             then
-                return 0
+                exit 0
             else
-                return 1
+                exit 1
             fi
       # - run:
       #     name: Frontend smoke test.
@@ -446,18 +447,16 @@ jobs:
       #       if curl -s ${URL} | grep "Welcome"
       #       then
       #           # Change this to 0 after the job fails
-      #         return 1
+      #         exit 1
       #       else
-      #         return 1
+      #         exit 1
       #       fi
-      # - configure-aws:
-      #     event: "on_fail"
-      # - destroy-environment
-      # - revert-migrations
-      # - slack/notify:
-      #     channel: $SLACK_DEFAULT_CHANNEL
-      #     event: fail
-      #     template: basic_fail_1  
+      - destroy-environment
+      - revert-migrations
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1  
 
 
 workflows:
