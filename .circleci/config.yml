@@ -418,6 +418,7 @@ jobs:
           name: Install dependencies
           command: |
             apk update && apk add --no-cache curl aws-cli
+      - configure-aws
       - run:
           name: Get backend url
           command: |
