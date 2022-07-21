@@ -557,12 +557,10 @@ workflows:
           requires: [configure-infrastructure]
       - deploy-frontend:
           <<: *slack-context
-          requires: [deploy-infrastructure]
           # <<: *filter-main
           requires: [run-migrations]
       - deploy-backend:
           <<: *slack-context
-          requires: [deploy-infrastructure]
           # <<: *filter-main
           requires: [run-migrations]
       - smoke-test:
