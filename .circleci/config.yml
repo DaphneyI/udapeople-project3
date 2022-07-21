@@ -435,7 +435,6 @@ jobs:
             export BACKEND_IP=$(cat backend_ip.txt)
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
-            curl ${API_URL}
             if curl "${API_URL}/api/status" | grep "ok"
             then
                 return 0
@@ -454,9 +453,9 @@ jobs:
             else
               return 1
             fi
-      # - configure-aws:
-          # event: "on_fail"
-      # - destroy-environment
+      - configure-aws:
+          event: "on_fail"
+      - destroy-environment
       - revert-migrations
       - slack/notify:
           channel: $SLACK_DEFAULT_CHANNEL
