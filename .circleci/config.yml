@@ -387,26 +387,18 @@ jobs:
             tar -C backend -czvf artifact.tar.gz .
             mv artifact.tar.gz /tmp
       - run:
-          name: run ansible playbook for test 
+          name: run ansible playbook
           command: |
             cd .circleci/ansible
-            ansible-playbook -i inventory.txt configure-server.yml
-            ansible-playbook -i inventory.txt deploy-backend.yml
-      # - run:
-      #     name: run ansible playbook
-      #     command: |
-      #       cd .circleci/ansible
-      #       echo "Contents  of the inventory file is -------"
-      #       cat /tmp/workspace/inventory 
-      #       ansible-playbook -i /tmp/workspace/inventory deploy-backend.yml
-      # - configure-aws:
-      #     event: "on_fail"
-      # - destroy-environment
-      # - revert-migrations
-      # - slack/notify:
-      #     channel: $SLACK_DEFAULT_CHANNEL
-      #     event: fail
-      #     template: basic_fail_1   
+            ansible-playbook -i /tmp/workspace/inventory deploy-backend.yml
+      - configure-aws:
+          event: "on_fail"
+      - destroy-environment
+      - revert-migrations
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1   
 
   smoke-test:
     executor: python-alpine
@@ -418,37 +410,33 @@ jobs:
             API_URL="http://35.87.198.102:3030" 
             curl "${API_URL}/api/status"
 
-  # smoke-test:
-  #   executor: node-13
-  #   steps:
-  #     - checkout
-  #     - run:
-  #         name: Install dependencies
-  #         command: |
-  #           # install aws cli
-  #           curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-  #           unzip awscliv2.zip
-  #           sudo ./aws/install
-  #           aws --version
-  #     - run:
-  #         name: Get backend url
-  #         command: |
-  #           aws ec2 describe-instances \
-  #           --query 'Reservations[*].Instances[*].PublicIpAddress' \
-  #           --output text  > backend_ip.txt
-  #           cat backend_ip.txt
-  #     - run:
-  #         name: Backend smoke test.
-  #         command: |
-  #           export BACKEND_IP=$(cat backend_ip.txt)
-  #           export API_URL="http://${BACKEND_IP}:3030"
-  #           echo "${API_URL}"
-  #           if curl "${API_URL}/api/status" | grep "ok"
-  #           then
-  #               return 0
-  #           else
-  #               return 1
-  #           fi
+  smoke-test:
+    executor: python-alpine
+    steps:
+      - checkout
+       - run:
+          name: Install dependencies
+          command: |
+            apk update && apk add --no-cache curl aws-cli
+      - run:
+          name: Get backend url
+          command: |
+            aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --output text  > backend_ip.txt
+            cat backend_ip.txt
+      - run:
+          name: Backend smoke test.
+          command: |
+            export BACKEND_IP=$(cat backend_ip.txt)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "${API_URL}"
+            if curl "${API_URL}/api/status" | grep "ok"
+            then
+                return 0
+            else
+                return 1
+            fi
       # - run:
       #     name: Frontend smoke test.
       #     command: |
@@ -461,14 +449,14 @@ jobs:
       #       else
       #         return 1
       #       fi
-      # - configure-aws:
-      #     event: "on_fail"
-      # - destroy-environment
-      # - revert-migrations
-      # - slack/notify:
-      #     channel: $SLACK_DEFAULT_CHANNEL
-      #     event: fail
-      #     template: basic_fail_1  
+      - configure-aws:
+          event: "on_fail"
+      - destroy-environment
+      - revert-migrations
+      - slack/notify:
+          channel: $SLACK_DEFAULT_CHANNEL
+          event: fail
+          template: basic_fail_1  
 
 
 workflows:
@@ -490,21 +478,21 @@ workflows:
       # - scan-backend:
       #     <<: *default-context
       #     requires: [build-backend]
-      # - deploy-infrastructure:
-      #    <<: *default-context
+      - deploy-infrastructure:
+         <<: *default-context
       #    requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      # - configure-infrastructure:
-      #     <<: *default-context
-      #     requires: [deploy-infrastructure] 
-      # - run-migrations:
-      #     <<: *default-context
-      #     requires: [configure-infrastructure]
+      - configure-infrastructure:
+          <<: *default-context
+          requires: [deploy-infrastructure] 
+      - run-migrations:
+          <<: *default-context
+          requires: [configure-infrastructure]
       # - deploy-frontend:
       #     <<: *default-context
       #     requires: [run-migrations]
       - deploy-backend:
           <<: *default-context
-          # requires: [run-migrations]
+          requires: [run-migrations]
       - smoke-test:
           <<: *default-context
           requires: [deploy-backend]
