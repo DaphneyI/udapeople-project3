@@ -496,27 +496,10 @@ jobs:
             if [[ "${CIRCLE_WORKFLOW_1D:0:5}" != "${OldWorkflowID}" ]] 
             then
               aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
-              aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
-              aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
+              aws cloudformation delete-stack --stack-name "backend-${OldWorkflowID}"
+              aws cloudformation delete-stack --stack-name "frontend-${OldWorkflowID}"
             fi
  
-  # test:
-  #   executor: aws
-  #   steps:
-  #     - configure-aws
-  #     - run:
-  #         command: |
-  #           backend=server
-  #           aws ec2 describe-instances --filters Name=tag:Name,Values=prometheus-${backend} \
-  #           --query "Reservations[*].Instances[*].PublicIpAddress" \
-  #           --output text >> file.txt
-
-  #           cat file.txt
-            
-  #           # aws ec2 describe-instances \
-  #           # --filters Name=key,Values=Name Name=value,Values="prometheus-server" \ 
-  #           #  --query 'Reservations[*].Instances[*].PublicIpAddress' \
-  #           # --output text 
 workflows:
   my_workflow:
     jobs:
@@ -568,7 +551,6 @@ workflows:
           <<: *slack-context
           # <<: *filter-main
           requires: [cloudfront-update]
-      # - test
 
     
      
