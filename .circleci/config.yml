@@ -223,10 +223,9 @@ jobs:
             mkdir -p /tmp/workspace
             cd .circleci/ansible
             echo [all] > /tmp/workspace/inventory
-            backend=
             aws ec2 describe-instances \
-            --filters Name=tag:Name,Values="backend-${CIRCLE_WORKFLOW_ID:0:5}" \ 
-            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filters Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:5} \
+            --query "Reservations[*].Instances[*].PublicIpAddress" \
             --output text >> /tmp/workspace/inventory
             cat /tmp/workspace/inventory
       - persist_to_workspace:
@@ -319,7 +318,7 @@ jobs:
           command: |
             export BACKEND_IP=$(aws ec2 describe-instances \
             --filters Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:5} \
-            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --query "Reservations[*].Instances[*].PublicIpAddress" \
             --output text)
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
@@ -409,7 +408,7 @@ jobs:
           command: |
             aws ec2 describe-instances \
             --filters Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:5} \
-            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --query "Reservations[*].Instances[*].PublicIpAddress" \
             --output text  > backend_ip.txt
             cat backend_ip.txt
       - run:
@@ -501,75 +500,75 @@ jobs:
               aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
             fi
  
-  test:
-    executor: aws
-    steps:
-      - configure-aws
-      - run:
-          command: |
-            backend=server
-            aws ec2 describe-instances --filters Name=tag:Name,Values=prometheus-${backend} \
-            --query "Reservations[*].Instances[*].PublicIpAddress" \
-            --output text >> file.txt
+  # test:
+  #   executor: aws
+  #   steps:
+  #     - configure-aws
+  #     - run:
+  #         command: |
+  #           backend=server
+  #           aws ec2 describe-instances --filters Name=tag:Name,Values=prometheus-${backend} \
+  #           --query "Reservations[*].Instances[*].PublicIpAddress" \
+  #           --output text >> file.txt
 
-            cat file.txt
+  #           cat file.txt
             
-            # aws ec2 describe-instances \
-            # --filters Name=key,Values=Name Name=value,Values="prometheus-server" \ 
-            #  --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            # --output text 
+  #           # aws ec2 describe-instances \
+  #           # --filters Name=key,Values=Name Name=value,Values="prometheus-server" \ 
+  #           #  --query 'Reservations[*].Instances[*].PublicIpAddress' \
+  #           # --output text 
 workflows:
   my_workflow:
     jobs:
-      # - build-frontend:
-      #     <<: *slack-context
-      # - build-backend:
-      #     <<: *slack-context
-      # - test-frontend:
-      #     <<: *slack-context
-      #     requires: [build-frontend]
-      # - test-backend:
-      #     <<: *slack-context
-      #     requires: [build-backend]
-      # - scan-frontend:
-      #     <<: *slack-context
-      #     requires: [build-frontend]
-      # - scan-backend:
-      #     <<: *slack-context
-      #     requires: [build-backend]
-      # - deploy-infrastructure:
-      #    <<: *slack-context
-      #   #  <<: *filter-main
-      #    requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      # - configure-infrastructure:
-      #     <<: *slack-context
-      #     # <<: *filter-main
-      #     requires: [deploy-infrastructure] 
-      # - run-migrations:
-      #     <<: *slack-context
-      #     # <<: *filter-main
-      #     requires: [configure-infrastructure]
-      # - deploy-frontend:
-      #     <<: *slack-context
-      #     # <<: *filter-main
-      #     requires: [run-migrations]
-      # - deploy-backend:
-      #     <<: *slack-context
-      #     # <<: *filter-main
-      #     requires: [run-migrations]
-      # - smoke-test:
-      #     <<: *slack-context
-      #     # <<: *filter-main
-      #     requires: [deploy-frontend, deploy-backend]
-      # - cloudfront-update:
-      #     <<: *slack-context
-      #     # <<: *filter-main
-      #     requires: [smoke-test]
-      # - cleanup:
-      #     <<: *slack-context
-      #     # <<: *filter-main
-      #     requires: [cloudfront-update]
-      - test
+      - build-frontend:
+          <<: *slack-context
+      - build-backend:
+          <<: *slack-context
+      - test-frontend:
+          <<: *slack-context
+          requires: [build-frontend]
+      - test-backend:
+          <<: *slack-context
+          requires: [build-backend]
+      - scan-frontend:
+          <<: *slack-context
+          requires: [build-frontend]
+      - scan-backend:
+          <<: *slack-context
+          requires: [build-backend]
+      - deploy-infrastructure:
+         <<: *slack-context
+        #  <<: *filter-main
+         requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      - configure-infrastructure:
+          <<: *slack-context
+          # <<: *filter-main
+          requires: [deploy-infrastructure] 
+      - run-migrations:
+          <<: *slack-context
+          # <<: *filter-main
+          requires: [configure-infrastructure]
+      - deploy-frontend:
+          <<: *slack-context
+          # <<: *filter-main
+          requires: [run-migrations]
+      - deploy-backend:
+          <<: *slack-context
+          # <<: *filter-main
+          requires: [run-migrations]
+      - smoke-test:
+          <<: *slack-context
+          # <<: *filter-main
+          requires: [deploy-frontend, deploy-backend]
+      - cloudfront-update:
+          <<: *slack-context
+          # <<: *filter-main
+          requires: [smoke-test]
+      - cleanup:
+          <<: *slack-context
+          # <<: *filter-main
+          requires: [cloudfront-update]
+      # - test
 
     
      
