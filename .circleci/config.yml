@@ -510,7 +510,9 @@ jobs:
             backend=server
             aws ec2 describe-instances --filters Name=tag:Name,Values=prometheus-${backend} \
             --query "Reservations[*].Instances[*].PublicIpAddress" \
-            --output text
+            --output text >> file.txt
+
+            cat file.txt
             
             # aws ec2 describe-instances \
             # --filters Name=key,Values=Name Name=value,Values="prometheus-server" \ 
