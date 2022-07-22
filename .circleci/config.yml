@@ -470,7 +470,7 @@ jobs:
             # update the cloudfront distro
             aws cloudformation deploy \
             --template-file .circleci/files/cloudfront.yml \
-            --stack-name udapeople-cf-prod \
+            --stack-name udapeople-cdn \
             --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:5}" \
             --tags project=udacityproject3
       - destroy-environment
