@@ -49,28 +49,16 @@ commands:
           command: |
             # empty the frontend bucket
             aws s3 rm s3://<< parameters.bucket-name >> --recursive
+
+            # delete frontend and backend stacks
             aws cloudformation delete-stack --stack-name << parameters.frontend-stack-name >>
             aws cloudformation delete-stack --stack-name << parameters.backend-stack-name >>
-
-  print-cloudformation-events:
-    parameters:
-      stack-name:
-        type: string
-    description: prints the cloudforation events for debuggig failed cloudformation commands
-    steps:
-      - run:  
-          command: |
-            aws cloudformation describe-stack-events \
-            --stack-name << parameters.stack-name >>
-          name: cloudformation stack debug 
-          when: on_fail
   
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.   
     steps:
       - run:
           name: Revert migrations
-          # Add when this will run
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
             SUCCESS=$(curl --insecure https://kvdb.io/P8Xcc73g9yAfoYt7Cqb7Qs/migration_${CIRCLE_WORKFLOW_ID:0:5})
@@ -94,11 +82,6 @@ filter-main: &filter-main
       only:
         - main
 
-filter-dev: &filter-dev
-  filters:
-    branches:
-      only:
-        - dev
 
 jobs:
   build-frontend:
@@ -224,7 +207,7 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
               --stack-name "backend-${CIRCLE_WORKFLOW_ID:0:5}" \
-              --tags project=udaproject3 \
+              --tags project=udacityproject3 \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:5}" 
       - print-cloudformation-events:
           stack-name: "backend-${CIRCLE_WORKFLOW_ID:0:5}"  
@@ -236,8 +219,6 @@ jobs:
               --stack-name "frontend-${CIRCLE_WORKFLOW_ID:0:5}" \
               --tags project=udacityproject3 \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:5}"
-      - print-cloudformation-events:
-          stack-name: "frontend-${CIRCLE_WORKFLOW_ID:0:5}"
       - run:
           name: Add backend ip to ansible inventory
           command: |
@@ -245,6 +226,7 @@ jobs:
             cd .circleci/ansible
             echo [all] > /tmp/workspace/inventory
             aws ec2 describe-instances \
+            --filter Name:tag:Name,Values:"backend-${CIRCLE_WORKFLOW_ID:0:5}"
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --output text >> /tmp/workspace/inventory
             cat /tmp/workspace/inventory
@@ -337,14 +319,13 @@ jobs:
           name: Get backend url
           command: |
             export BACKEND_IP=$(aws ec2 describe-instances \
-              --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --output text )
+            --filter Name:tag:Name,Values:"backend-${CIRCLE_WORKFLOW_ID:0:5}"
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --output text)
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
             cd frontend
-            ls -la
-            cat .env
       - run:
           name: Deploy frontend objects
           command: |
@@ -428,6 +409,7 @@ jobs:
           name: Get backend url
           command: |
             aws ec2 describe-instances \
+            --filter Name:tag:Name,Values:"backend-${CIRCLE_WORKFLOW_ID:0:5}"
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --output text  > backend_ip.txt
             cat backend_ip.txt
@@ -484,12 +466,15 @@ jobs:
             --no-paginate --output text)
             echo $OldWorkflowID
 
+            # save it in kvdb
+            curl -k https://kvdb.io/P8Xcc73g9yAfoYt7Cqb7Qs/OldWorkflowID  -d "${OldWorkflowID}"
+
             # update the cloudfront distro
             aws cloudformation deploy \
             --template-file .circleci/files/cloudfront.yml \
-            --stack-name udapeople-${OldWorkflowID} \
+            --stack-name udapeople-cf-prod \
             --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:5}" \
-            --tags project=udapeople
+            --tags project=udacityproject3
       - destroy-environment
       - revert-migrations
       - slack/notify:
@@ -503,21 +488,14 @@ jobs:
       - checkout
       - configure-aws
       - run:
-          name: Get old stack workflow id
+          name: delete green stack
           command: |
             # Fetch the Old workflow ID
-            export OldWorkflowID=$(aws cloudformation \
-            list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
-            --no-paginate --output text)
-            echo "OldWorkflowID is ${OldWorkflowID}"
-
-            # Fetch the stack names          
-            export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
-            --stack-status-filter CREATE_COMPLETE --no-paginate --output text)) 
-            echo "Stack names = ${STACKS[@]}"          
+            export OldWorkflowID=$(curl --insecure https://kvdb.io/P8Xcc73g9yAfoYt7Cqb7Qs/OldWorkflowID)
+            echo "OldWorkflowID is ${OldWorkflowID}"          
 
             # remove old stack
-            if [[ "${CIRCLE_WORKFLOW_1D:0:5}" != "${OldWorkflowID}" ]] && [[ "${OldWorkflowID}" =~ "${STACKS[@]}" ]]
+            if [[ "${CIRCLE_WORKFLOW_1D:0:5}" != "${OldWorkflowID}" ]] 
             then
               aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
               aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
