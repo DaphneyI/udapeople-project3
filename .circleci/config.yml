@@ -508,7 +508,8 @@ jobs:
       - run:
           command: |
             backend=server
-            aws ec2 describe-instances --filters Name=tag:Name,Values=prometheus-${backend} 
+            aws ec2 describe-instances --filters Name=tag:Name,Values=prometheus-${backend} \
+            --query "Reservations[*].Instances[*].PublicIpAddress"
             
             # aws ec2 describe-instances \
             # --filters Name=key,Values=Name Name=value,Values="prometheus-server" \ 
