@@ -509,7 +509,7 @@ jobs:
           command: |
             backend=server
             aws ec2 describe-instances \
-            --filters Name=tag:Name,Values="prometheus-${backend}" \ 
+            --filters Name=key,Values=Name Name=value,Values="prometheus-${backend}" \ 
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --output text 
 workflows:
