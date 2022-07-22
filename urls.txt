@@ -1,0 +1,5 @@
+[URL02]: s3 url <br>
+[URL03]: cloudfront url <br>
+[URL04]: http://ip:3030/api/status <br>
+[URL05]: prometheus server
+

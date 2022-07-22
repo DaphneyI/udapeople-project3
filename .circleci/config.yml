@@ -521,35 +521,35 @@ workflows:
           requires: [build-backend]
       - deploy-infrastructure:
          <<: *slack-context
-        #  <<: *filter-main
+         <<: *filter-main
          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
       - configure-infrastructure:
           <<: *slack-context
-          # <<: *filter-main
+          <<: *filter-main
           requires: [deploy-infrastructure] 
       - run-migrations:
           <<: *slack-context
-          # <<: *filter-main
+          <<: *filter-main
           requires: [configure-infrastructure]
       - deploy-frontend:
           <<: *slack-context
-          # <<: *filter-main
+          <<: *filter-main
           requires: [run-migrations]
       - deploy-backend:
           <<: *slack-context
-          # <<: *filter-main
+          <<: *filter-main
           requires: [run-migrations]
       - smoke-test:
           <<: *slack-context
-          # <<: *filter-main
+          <<: *filter-main
           requires: [deploy-frontend, deploy-backend]
       - cloudfront-update:
           <<: *slack-context
-          # <<: *filter-main
+          <<: *filter-main
           requires: [smoke-test]
       - cleanup:
           <<: *slack-context
-          # <<: *filter-main
+          <<: *filter-main
           requires: [cloudfront-update]
 
     
