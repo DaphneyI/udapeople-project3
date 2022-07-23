@@ -1,5 +1,6 @@
-[URL02]: s3 url <br>
-[URL03]: cloudfront url <br>
-[URL04]: http://ip:3030/api/status <br>
-[URL05]: prometheus server
+[URL01]: https://github.com/DaphneyI/udapeople-project3
+[URL02]: http://udapeople-9f016.s3-website-us-west-2.amazonaws.com
+[URL03]: http://dm2i77a4rt7d2.cloudfront.net
+[URL04]: http://35.91.48.42:3030/api/status 
+[URL05]: http://34.209.41.50:9090
 
