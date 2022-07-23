@@ -20,13 +20,14 @@ Resources:
     Properties:
       DistributionConfig:
         Origins:
-          - DomainName: !Sub "http://udapeople-${WorkflowID}.s3-website-us-west-2.amazonaws.com"
+          - DomainName: !Sub "udapeople-${WorkflowID}.s3-website-us-west-2.amazonaws.com"
             Id: webpage
             CustomOriginConfig:
-              OriginProtocolPolicy: match-viewer
+              OriginProtocolPolicy: http-only
         Enabled: True
         DefaultRootObject: index.html
         DefaultCacheBehavior:
+          AllowedMethods: [GET, HEAD, OPTIONS, PUT, PATCH, POST, DELETE]
           ForwardedValues:
             QueryString: False
           TargetOriginId: webpage
